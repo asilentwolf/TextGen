@@ -9,11 +9,15 @@ A Vector text generator!
   - Json
 
 ## How To Use?
-*To Genarate Email Pay*
+*1. Email Pay*
 ```
-    ./main.py -type email -a attacker@mail.com -v victim@mail.com -ad mail.com -vt tab 
+  ./main.py -type email -a asilentwolf@gmail.com -v pentesting49@mail.com -ad mail.com -vt e -name email -po
 ```
-*For Regex Fuzz PayGen*
+*2. For Regex Fuzz PayGen*
 ```
     ./main.py -type rff -text text -vt u 
+```
+*3. HPP*
+```
+    ./main.py -type hpp -vt tab -name email -pay alaminhossyin@gmail.com [JsonBased Tested]
 ```

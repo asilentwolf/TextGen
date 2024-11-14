@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import aiofiles
 import re
 from utils import generator
+from utils import utils
 
 #Colors...
 class Colors:
@@ -40,6 +41,10 @@ async def argparser():
     parser = argparse.ArgumentParser()
     # Global arguments
     parser.add_argument('--file', help='File to be processed')
+    parser.add_argument('-p', '--proxy', help='Proxy if any (default: None)')
+    parser.add_argument('-w', '--worker', type=int, help='Number of Workers (default: 5)')
+    parser.add_argument('-c', '--concurrency', type=int, help='Number of concurrency Workers[Use it for multiple Hosts]')
+    parser.add_argument('-m', '--method', type=str, help="To Use Method")
     parser.add_argument('-vt', '--vt', help="Vector Type")
     parser.add_argument('-text', '--text', help="To text for Gen")
     parser.add_argument('-o', '--out', help="For file OUTPUT")
@@ -47,42 +52,65 @@ async def argparser():
     parser.add_argument('-v', '--v', help='Victim identifier, Vectors and Others')
     parser.add_argument('-ad', '--ad', help='Attacker Doamin tld or other things')
     parser.add_argument('-type', '--type', help='rff To FUZZ Regex')
-    parser.add_argument('-peram', '--peram', help='Peram Name To Work')
+    parser.add_argument('-name', '--name', help='Peram Name To Work')
+    parser.add_argument('-pay', '--pay', help='Payload Text')
+    parser.add_argument('-po', '--printonly', action="store_true", help='Only Print')
 
 
     args = parser.parse_args()
     
-    #VType
-    if args.vt is not None:
-        vtype = args.vt
-    else:
-        vtype = 'all'
-    
-    #A,V and AD args
-    if args.a:
-        Attacker = args.a
-    else:
-        Attacker = None
-    if args.v:
-        Victim = args.v
-    else:
-        Victim = None
-    if args.ad:
-        AttackerD = args.ad
-    else:
-        AttackerD = None
-    
-    if args.type:
-        Type = args.type
-    else:
-        Type = None
-    
-    if args.text:
-        Text = args.text
-    else:
-        Text = None
+    #args
+    vtype = args.vt if args.vt is not None else 'all'
+    Attacker = getattr(args, 'a', None)
+    Victim = getattr(args, 'v', None)
+    AttackerD = getattr(args, 'ad', None)
+    Type = getattr(args, 'type', None)
+    Text = getattr(args, 'text', None)
+    Name = getattr(args, 'name', None)
+    PAY = getattr(args, 'pay', None)
+    Data = getattr(utils, 'datax', None)
 
-    Gen = generator.Main(text=Text, AD=AttackerD, A=Attacker, V=Victim, VT=vtype)
+    if args.printonly:
+        Print = True
+    else:
+        Print = None
+    if args.worker is not None:
+        utils.Worker = args.worker
+    else:
+        utils.Worker = 1
+    if args.proxy is not None:
+        utils.proxy = args.proxy
+    else:
+        utils.proxy = None
+    if args.concurrency is not None:
+        utils.Concurrency = args.concurrency
+    else:
+        utils.Concurrency = 1
+    if args.method is not None:
+        method = args.method
+    else:
+        method = utils.METHODS
+    
+    if utils.header:
+        Headers = utils.header
+    else:
+        Headers = {
+            "User-Agent": utils.UserAgent,
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "close",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Priority": "u=0, i"
+            }
+    
+
+
+    Gen = generator.Main(text=Text, Data=Data, AD=AttackerD, Print=Print, Method=method, Headers=Headers,
+                         A=Attacker, V=Victim, VT=vtype, Name=Name, PAY=PAY, Proxy=utils.proxy, Url=utils.url)
     await Gen.run(Type=Type)    
         
 if __name__ == "__main__":
