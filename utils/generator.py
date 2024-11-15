@@ -29,6 +29,8 @@ class Colors:
 
 #Vectors
 delimiter = []
+Curated = ["嘍嘊","%E2%A0%80%0A%E2%A0%80", "%0a%0a%0a%0a%0a","\u0000", "%00%00","%00", "%20%20",
+        "%2f%2e%2e%0d%0a", "%25%32%65", "%5Ct", "%5Cn", "%5Cx0b%5Cx0c", "%20","%0"]
 OOff = [
     "%00", "%01", "%02", "%03", "%04", "%05", "%06", "%07", "%08", "%09", "%0a", "%0b", "%0c", "%0d", "%0e", "%0f",
     "%10", "%11", "%12", "%13", "%14", "%15", "%16", "%17", "%18", "%19", "%1a", "%1b", "%1c", "%1d", "%1e", "%1f",
@@ -47,9 +49,11 @@ OOff = [
     "%e0", "%e1", "%e2", "%e3", "%e4", "%e5", "%e6", "%e7", "%e8", "%e9", "%ea", "%eb", "%ec", "%ed", "%ee", "%ef",
     "%f0", "%f1", "%f2", "%f3", "%f4", "%f5", "%f6", "%f7", "%f8", "%f9", "%fa", "%fb", "%fc", "%fd", "%fe", "%ff",
     "%00", "%0", ]
+Twobyte = [f"{item}{item}" for item in OOff]
 Crlf = ["%E2%A0%80%0A%E2%A0%80", "%0a%0a%0a%0a%0a",
         "嘍嘊", "%E5%98%8D%E5%98%8A", "%3f%0d", 
         "%2f%2e%2e%0d%0a", "%25%32%65"]
+
 Tab = ["%5Ct", "%5Cn", "%5Cx0b%5Cx0c"]
 Extra = ["%B0%B0%B0", "%2e%2e", "%5c%75%64%66%66%66%0a", "&",
          "%2f%2f.", "%3a%2f%2f", "°", "%ff%ff", "%0b%0b", 
@@ -133,9 +137,17 @@ class Main:
         elif type == "e": 
             for e in EmailPays:
                 Payed.append(e)
-            #Todo: To fuzz 2 Bytes
-        
+        elif type == "two":
+            for two in Twobyte:
+                Payed.append(two)
+        elif type == "cu":
+            for cu in Curated:
+                Payed.append(cu)
         return list(set(Payed))
+    
+    async def abnormalizer(self, text):
+        from utils import abnormalizer
+        return abnormalizer.main(text=text)
 
     async def regexfuzzing(self, text, VT):
         import string
@@ -166,10 +178,6 @@ class Main:
             return sorted(final) 
 
         return await Main()
-
-    async def abnormalizer(self, text):
-        from utils import abnormalizer
-        return abnormalizer.main(text=text)
     
 
     async def Email_Pay(self, A=None, V=None, AD=None, Type=None):
@@ -269,6 +277,34 @@ class Main:
                 Payed.append(unquote(new_query_string)) 
 
         return Payed       
+
+
+
+    
+    async def Remove_Cookie(self):  #ONE By One!
+        print("SOON")
+    async def Remove_Header(self):  #ONE By One!
+        print("Soon")
+    
+    async def Remove_Peram(self):
+        print("Soon")
+    
+    async def FatGet():
+        print("Soon")
+        """
+            GET ?name=victim
+            body name=attacker
+
+            GET ?name=attacker
+            body name=victim
+                
+                Same with Post
+            With _method=value also
+        """
+    
+    async def fuzz_Method():
+        print('soon')
+    
 
 
    
