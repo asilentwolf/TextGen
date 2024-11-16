@@ -302,22 +302,55 @@ class Main:
                 Payed.append(new_text)
 
         return Payed
-
     
     async def Remove_Cookie(self):  #ONE By One!
-        print("SOON")
+        if 'Cookie' in self.Headers:
+            Cookie = self.Headers['Cookie']
+            C = []
+            cookie_dict = {}
+            cookies = Cookie.split('; ')
+            for cookie in cookies:
+                # Split each cookie at the '=' sign
+                key, value = cookie.split('=', 1)
+                # Add the key-value pair to the dictionary
+                cookie_dict[key.strip()] = value.strip() 
+            
+            for param in list(cookie_dict.keys()):
+                del cookie_dict[param]
+                new_query_string = urlencode(cookie_dict, doseq=True)
+                C.append(f"{new_query_string}".strip())
+            return C
+        
     async def Remove_Header(self):  #ONE By One!
-        print("Soon")
+        Headered = []
+        for k, v in self.Headers.items():
+            print(k)
     
-    async def Remove_Peram(self):
-        print("Soon")
-    
-    async def FatGet():
-        print("Soon")
+    async def Remove_Peram(self, Type=None):
+        Peram = []
+        if Type == "Json":
+            print("Json")
+        else:
+            query_params = parse_qs(self.Data)
+            for param in list(query_params.keys()):
+                del query_params[param]
+                new_query_string = urlencode(query_params, doseq=True)
+                Peram.append(new_query_string) 
+        
+        return Peram
+           
+    async def FatGet(self, Type=None):
         """
             GET ?name=victim
             body name=attacker
+        """
+        if type == "Json":
+            print("for Json")
+        
+        else:
+            print("Working ON")
 
+        """
             GET ?name=attacker
             body name=victim
                 
@@ -389,3 +422,30 @@ class Main:
                         tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=d,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(Payed))]
                         for task in asyncio.as_completed(tasks):
                             await task
+        elif Type == 'rc':
+            Payed = await self.Remove_Cookie()
+            if self.Print:
+                for x in Payed:
+                    print(x)
+            else:
+                semaphore = asyncio.Semaphore(1)  
+                tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers, Cookie=d)) for d in list(set(Payed))]
+                for task in asyncio.as_completed(tasks):
+                    await task
+        elif Type == 'rp':
+            Payed = await self.Remove_Peram()
+            if self.Print:
+                for x in Payed:
+                    print(x)
+            else:
+                semaphore = asyncio.Semaphore(1)  
+                tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers, Cookie=d)) for d in list(set(Payed))]
+                for task in asyncio.as_completed(tasks):
+                    await task
+        elif Type == "rh":
+            Payed = await self.Remove_Header()
+            for x in Payed:
+                print(x)
+        elif Type == "fat":
+            Payed = await self.FatGet()
+

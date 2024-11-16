@@ -19,6 +19,14 @@ warnings.filterwarnings("ignore")    # ignor any warning in teminal
 async def Main(Url, Semaphore, H=None, Data=None, Headers=None,
                Cookie=None, Type=None, Method=None, Proxy=None):  
     
+    if Cookie:
+        C = {
+            "Cookie": Cookie
+            }
+        if 'Cookie' in Headers:
+            del Headers['Cookie']
+        Headers.update(C)
+
     U = ""
     if 'Content-Length' in Headers:
         del Headers['Content-Length']
