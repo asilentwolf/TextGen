@@ -322,9 +322,13 @@ class Main:
             return C
         
     async def Remove_Header(self):  #ONE By One!
-        Headered = []
-        for k, v in self.Headers.items():
-            print(k)
+       Headered = [
+           {key: value for key, value in self.Headers.items() if key != k}
+           for k in self.Headers
+           ]
+       
+       return Headered
+        
     
     async def Remove_Peram(self, Type=None):
         Peram = []
@@ -340,15 +344,48 @@ class Main:
         return Peram
            
     async def FatGet(self, Type=None):
-        """
-            GET ?name=victim
-            body name=attacker
-        """
+        from utils import requester
+        
         if type == "Json":
             print("for Json")
         
         else:
-            print("Working ON")
+            async def machine(method=None, Type=None):
+                query_params = copy.deepcopy(parse_qs(self.Data))
+                value = query_params.get(self.Name, [None])[0]
+
+                """
+                    Inurl: ?name=attackrr
+                    body: name=victim
+                """
+                query_params[self.Name] = f"{self.PAY}"
+                Queryfor_pay = urlencode(query_params, doseq=True)
+                URL = f"{self.Url}?{Queryfor_pay}"
+
+                semaphore = asyncio.Semaphore(1)  
+                await requester.Main(Url=URL, Method=method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+                    
+                """
+                    Inurl: ?name=victim
+                    body: name=attacker
+                """
+
+                query_params[self.Name] = f"{self.PAY}"
+                Queryfor_pay = urlencode(query_params, doseq=True)
+                URL = f"{self.Url}?{self.Data}"
+                Body = Queryfor_pay
+
+                semaphore = asyncio.Semaphore(1)  
+                await requester.Main(Url=URL, Method=method, Data=Body,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+            
+            Methods = ['GET', 'POST']
+            for x in Methods:
+                await machine(method=x)
+
+            #semaphore = asyncio.Semaphore(1)  
+            #await requester.Main(Url=Url_forGET, Method='GET', Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+            
+
 
         """
             GET ?name=attacker
@@ -444,8 +481,14 @@ class Main:
                     await task
         elif Type == "rh":
             Payed = await self.Remove_Header()
-            for x in Payed:
-                print(x)
+            if self.Print:
+                for x in Payed:
+                    print(x)
+            else:
+                semaphore = asyncio.Semaphore(1)  
+                tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=d)) for d in Payed]
+                for task in asyncio.as_completed(tasks):
+                    await task
         elif Type == "fat":
             Payed = await self.FatGet()
 

@@ -55,11 +55,6 @@ async def Main(Url, Semaphore, H=None, Data=None, Headers=None,
     except Exception as e:
         #pass
         print(f"An unexpected error occurred for {Url}: {e}")
-
-    finally:
-        # Ensure client is closed properly
-        await client.aclose()
-        pass
         
     await asyncio.sleep(0.005) 
     return U.strip()
