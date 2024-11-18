@@ -351,6 +351,7 @@ class Main:
         
         else:
             async def machine(method=None, Type=None):
+                char = await self.Payed(type=self.VT)
                 query_params = copy.deepcopy(parse_qs(self.Data))
                 value = query_params.get(self.Name, [None])[0]
 
@@ -378,23 +379,40 @@ class Main:
                 semaphore = asyncio.Semaphore(1)  
                 await requester.Main(Url=URL, Method=method, Data=Body,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
             
+                
+                #ON URL
+                URLed = []
+                for xx in char:
+                    query_params[self.Name] = f"{value}{xx}{self.Name}={self.PAY}"
+                    new_query_string = urlencode(query_params, doseq=True)
+                    URLed.append(f"{self.Url}?{unquote(new_query_string)}") 
+                
+                semaphore = asyncio.Semaphore(1)  
+                tasks = [asyncio.create_task(requester.Main(Url=d, Method=self.Method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(URLed))]
+                for task in asyncio.as_completed(tasks):
+                    await task
+
+                #ON Body
+                for xx0 in char:
+                    query_params[self.Name] = f"{value}{xx0}{self.Name}={self.PAY}"
+                    new_query_string = urlencode(query_params, doseq=True)
+                    Body = f"{unquote(new_query_string)}"
+                    Url = f"{self.Url}?{self.Data}"
+                    await requester.Main(Url=Url, Method=self.Method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+                
+                #HPP On bOTH
+                for xx1 in char:
+                    query_params[self.Name] = f"{value}{xx1}{self.Name}={self.PAY}"
+                    new_query_string = urlencode(query_params, doseq=True)
+                    Body = f"{unquote(new_query_string)}"
+                    Url = f"{self.Url}?{unquote(new_query_string)}"
+                    await requester.Main(Url=Url, Method=self.Method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+                
+
             Methods = ['GET', 'POST']
             for x in Methods:
                 await machine(method=x)
 
-            #semaphore = asyncio.Semaphore(1)  
-            #await requester.Main(Url=Url_forGET, Method='GET', Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
-            
-
-
-        """
-            GET ?name=attacker
-            body name=victim
-                
-                Same with Post
-            With _method=value also
-        """
-    
     async def fuzz_Method():
         print('soon')
     
