@@ -30,7 +30,7 @@ class Colors:
 #Vectors
 delimiter = []
 Curated = ["嘍嘊","%E2%A0%80%0A%E2%A0%80", "%0a%0a%0a%0a%0a","\u0000", "%00%00","%00", "%20%20",
-        "%2f%2e%2e%0d%0a", "%25%32%65", "%5Ct", "%5Cn", "%5Cx0b%5Cx0c", "%20","%0"]
+        "%2f%2e%2e%0d%0a", "%25%32%65", "%5Ct", "%5Cn", "%5Cx0b%5Cx0c", "%20","%0", "%0A","%0D"]
 OOff = [
     "%00", "%01", "%02", "%03", "%04", "%05", "%06", "%07", "%08", "%09", "%0a", "%0b", "%0c", "%0d", "%0e", "%0f",
     "%10", "%11", "%12", "%13", "%14", "%15", "%16", "%17", "%18", "%19", "%1a", "%1b", "%1c", "%1d", "%1e", "%1f",
@@ -388,7 +388,7 @@ class Main:
                     URLed.append(f"{self.Url}?{unquote(new_query_string)}") 
                 
                 semaphore = asyncio.Semaphore(1)  
-                tasks = [asyncio.create_task(requester.Main(Url=d, Method=self.Method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(URLed))]
+                tasks = [asyncio.create_task(requester.Main(Url=d, Method=method, Data=self.Data,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(URLed))]
                 for task in asyncio.as_completed(tasks):
                     await task
 
@@ -398,7 +398,7 @@ class Main:
                     new_query_string = urlencode(query_params, doseq=True)
                     Body = f"{unquote(new_query_string)}"
                     Url = f"{self.Url}?{self.Data}"
-                    await requester.Main(Url=Url, Method=self.Method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+                    await requester.Main(Url=Url, Method=method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
                 
                 #HPP On bOTH
                 for xx1 in char:
@@ -406,9 +406,8 @@ class Main:
                     new_query_string = urlencode(query_params, doseq=True)
                     Body = f"{unquote(new_query_string)}"
                     Url = f"{self.Url}?{unquote(new_query_string)}"
-                    await requester.Main(Url=Url, Method=self.Method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
+                    await requester.Main(Url=Url, Method=method, Data=Body, Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)
                 
-
             Methods = ['GET', 'POST']
             for x in Methods:
                 await machine(method=x)
