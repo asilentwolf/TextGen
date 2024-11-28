@@ -90,6 +90,10 @@ async def argparser():
         method = args.method
     else:
         method = utils.METHODS
+    if utils.url:
+        url = utils.url
+    else:
+        url = None
     
     if utils.header:
         Headers = utils.header
@@ -110,7 +114,7 @@ async def argparser():
 
 
     Gen = generator.Main(text=Text, Data=Data, AD=AttackerD, Print=Print, Method=method, Headers=Headers,
-                         A=Attacker, V=Victim, VT=vtype, Name=Name, PAY=PAY, Proxy=utils.proxy, Url=utils.url)
+                         A=Attacker, V=Victim, VT=vtype, Name=Name, PAY=PAY, Proxy=utils.proxy, Url=url)
     await Gen.run(Type=Type)    
         
 if __name__ == "__main__":

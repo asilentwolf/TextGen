@@ -12,9 +12,7 @@ import copy
 import time
 import json
 
-
 warnings.filterwarnings("ignore")    # ignor any warning in teminal
-
 
 #Colors 
 class Colors:
@@ -103,6 +101,11 @@ class Main:
                 Payed.append(e)
             for p in OOff:  #00-FF
                 Payed.append(p)
+            for two in Twobyte:
+                Payed.append(two)
+            for cu in Curated:
+                Payed.append(cu)
+
         elif type == "u":
             for x in forUnicode: 
                 unicode.append(f"\\u00{x.replace('%', '')}")
@@ -414,9 +417,6 @@ class Main:
 
     async def fuzz_Method():
         print('soon')
-    
-
-
    
 
     async def run(self, Type=None):
@@ -432,7 +432,7 @@ class Main:
                         Payed.append(json.dumps(bodydict, indent=4))
 
                     if self.Print:
-                        for x in Payed:
+                        for x in emailVector:
                             print(x)
                     else:
                         semaphore = asyncio.Semaphore(1)  
@@ -446,6 +446,10 @@ class Main:
                         bodydict[self.Name] = x   
                         new_query_string = urlencode(bodydict, doseq=True)
                         print(new_query_string)
+            else:
+                 if self.Print:
+                    for x in emailVector:
+                        print(x)
             
         elif Type == "rff":
             result = await self.regexfuzzing(text=self.text, VT=self.VT)
@@ -476,6 +480,10 @@ class Main:
                         tasks = [asyncio.create_task(requester.Main(Url=self.Url, Method=self.Method, Data=d,Semaphore=semaphore, Proxy=self.Proxy, Headers=self.Headers)) for d in list(set(Payed))]
                         for task in asyncio.as_completed(tasks):
                             await task
+            else:
+                 if self.Print:
+                    for x in emailVector:
+                        print(x)
         elif Type == 'rc':
             Payed = await self.Remove_Cookie()
             if self.Print:
